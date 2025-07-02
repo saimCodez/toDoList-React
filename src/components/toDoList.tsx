@@ -7,10 +7,13 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+import { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Tooltip from "./ToolTip";
 
 export const ToDoList = () => {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
   //  task    updatetask
   const [tasks, setTasks] = useState<string[]>([
     "Eat breakfast",
@@ -39,6 +42,9 @@ export const ToDoList = () => {
       setTasks((prev) => [...prev, newTask]);
       setNewTask("");
       // 👆 means that the value of input which we added as task became empty when we enter so it will become as a task and the taskwhich we typed in input value got empty
+      setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100); // wait for DOM update
     }
   };
 
@@ -214,7 +220,9 @@ export const ToDoList = () => {
                       </Tooltip>
                     </div>
                   </div>
+                  <div ref={bottomRef} /> 
                 </motion.li>
+                
               ))}
             </ol>
           </div>
