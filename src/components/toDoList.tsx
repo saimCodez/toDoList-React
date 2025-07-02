@@ -11,9 +11,13 @@ import { motion } from "framer-motion";
 import Tooltip from "./ToolTip";
 
 export const ToDoList = () => {
-    //  task    updatetask
-  const [tasks, setTasks] = useState<string[]>(["Eat breakfast","take shower","Go to school",]);
-    // taskInput  updateTaskInput
+  //  task    updatetask
+  const [tasks, setTasks] = useState<string[]>([
+    "Eat breakfast",
+    "take shower",
+    "Go to school",
+  ]);
+  // taskInput  updateTaskInput
   const [newTask, setNewTask] = useState<string>("");
 
   const [sort, setSort] = useState<string>("");
@@ -34,7 +38,7 @@ export const ToDoList = () => {
     if (newTask.trim() !== "") {
       setTasks((prev) => [...prev, newTask]);
       setNewTask("");
-    // 👆 means that the value of input which we added as task became empty when we enter so it will become as a task and the taskwhich we typed in input value got empty
+      // 👆 means that the value of input which we added as task became empty when we enter so it will become as a task and the taskwhich we typed in input value got empty
     }
   };
 
@@ -112,6 +116,7 @@ export const ToDoList = () => {
               <div className="relative inline-block">
                 <select
                   id="sort"
+                  value={sort}
                   onChange={SortTodos}
                   className="appearance-none pl-4 pr-10 py-2 bg-white border border-gray-300 text-sm rounded-full shadow-sm text-gray-600 font-medium focus:outline-none focus:ring-2 focus:ring-[#FF5B5B] focus:border-[#FF5B5B] hover:border-[#FF5B5B] transition-all cursor-pointer"
                 >
