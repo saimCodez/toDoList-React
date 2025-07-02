@@ -43,8 +43,8 @@ export const ToDoList = () => {
       setNewTask("");
       // 👆 means that the value of input which we added as task became empty when we enter so it will become as a task and the taskwhich we typed in input value got empty
       setTimeout(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100); // wait for DOM update
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100); // wait for DOM update
     }
   };
 
@@ -220,9 +220,8 @@ export const ToDoList = () => {
                       </Tooltip>
                     </div>
                   </div>
-                  <div ref={bottomRef} /> 
+                  <div ref={bottomRef} />
                 </motion.li>
-                
               ))}
             </ol>
           </div>
