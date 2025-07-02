@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .scroll-down::before,
+  .scroll-down::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    height: 10px;
+    width: 10px;
+    border: 2px solid lightgray;
+    transform: translate(-50%, -100%) rotate(45deg);
+    border-top-color: transparent;
+    border-left-color: transparent;
+    animation: scroll-down 2s ease-in-out infinite;
+  }
+
+  .scroll-down::before {
+    top: 30%;
+    animation-delay: 0.5s;
+  }
+
+  .scroll-down::after {
+    top: 20%;
+  }
+}
