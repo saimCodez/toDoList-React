@@ -1,7 +1,7 @@
 import { ArrowDownAZ, ClipboardCheckIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
-import { TodoItem } from "./toDoItem";
+import { TodoItem } from "./todoItem";
 import type { Task } from "../types";
 
 const generateId = () => crypto.randomUUID(); // Or use Date.now().toString() for simpler ID
