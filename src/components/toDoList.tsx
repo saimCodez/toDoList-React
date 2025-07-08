@@ -1,52 +1,64 @@
-import { useState } from "react";
 import {
-  ArrowDown,
   ArrowDownAZ,
-  ArrowUp,
   ClipboardCheckIcon,
-  Pencil,
-  Trash2,
 } from "lucide-react";
-import { useRef } from "react";
-import { motion } from "framer-motion";
-import Tooltip from "./ToolTip";
+import { useRef, useState } from "react";
+
+import { TodoItem } from "./toDoItem";
+import type { Task } from "../types";
+
+const generateId = () => crypto.randomUUID(); // Or use Date.now().toString() for simpler ID
 
 export const ToDoList = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   //  task    updatetask
-  const [tasks, setTasks] = useState<string[]>([
-    "Eat breakfast",
-    "take shower",
-    "Go to school",
-  ]);
-  // taskInput  updateTaskInput
-  const [newTask, setNewTask] = useState<string>("");
+  const toDoKey = "reactTodo";
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    const rawTodos = localStorage.getItem(toDoKey);
 
+    if (rawTodos) return JSON.parse(rawTodos);
+
+    // Default todos with random IDs
+    return [
+      { id: generateId(), text: "Eat breakfast" },
+      { id: generateId(), text: "Take shower" },
+      { id: generateId(), text: "Go to school" },
+    ];
+  });
+  // taskInput  updateTaskInput
+  const [inputTask, setinputTask] = useState<string>("");
   const [sort, setSort] = useState<string>("");
-  const [movingIndex, setMovingIndex] = useState<number | null>(null);
+  const [movingIndex, setMovingIndex] = useState<number>(0);
   const [direction, setDirection] = useState<"up" | "down" | null>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
+  const [editValue, setEditValue] = useState<Task | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTask(e.target.value);
+    setinputTask(e.target.value);
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditValue(e.target.value);
+    if (!editValue) return;
+
+    // Update the text inside the Task object
+    setEditValue({ ...editValue, text: e.target.value });
   };
 
   const addTask = () => {
-    if (newTask.trim() !== "") {
-      setTasks((prev) => [...prev, newTask]);
-      setNewTask("");
+    const generateId = () => crypto.randomUUID(); // Or use Date.now().toString() for simpler ID
+
+    if (inputTask.trim() !== "") {
+      setTasks((prev) => [...prev, { id: generateId(), text: inputTask }]);
+      setinputTask("");
       // 👆 means that the value of input which we added as task became empty when we enter so it will become as a task and the taskwhich we typed in input value got empty
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100); // wait for DOM update
     }
   };
+
+  localStorage.setItem(toDoKey, JSON.stringify(tasks));
 
   const deleteTask = (index: number) => {
     const updated = tasks.filter((_, i) => i !== index);
@@ -64,7 +76,7 @@ export const ToDoList = () => {
           updated[index],
         ];
         setTasks(updated);
-        setMovingIndex(null);
+        setMovingIndex(0);
         setDirection(null);
       }, 200);
     }
@@ -81,7 +93,7 @@ export const ToDoList = () => {
           updated[index],
         ];
         setTasks(updated);
-        setMovingIndex(null);
+        setMovingIndex(0);
         setDirection(null);
       }, 200);
     }
@@ -91,7 +103,9 @@ export const ToDoList = () => {
     const value = e.target.value;
     setSort(value);
     const sorted = [...tasks].sort((a, b) =>
-      value === "asc" ? a.localeCompare(b) : b.localeCompare(a)
+      value === "asc"
+        ? a.text.localeCompare(b.text)
+        : b.text.localeCompare(a.text)
     );
     setTasks(sorted);
   };
@@ -103,18 +117,26 @@ export const ToDoList = () => {
 
   const saveEdit = (index: number) => {
     const updated = [...tasks];
-    updated[index] = editValue.trim() || updated[index];
+    if(editValue?.text == ""){
+      alert("Please enter the value")
+      return 
+    }
+    updated[index] = editValue || updated[index];
     setTasks(updated);
     setEditingIndex(null);
-    setEditValue("");
+    setEditValue({ id: "", text: "" });
+  };
+
+  const deleteAll = () => {
+    setTasks([]);
   };
 
   return (
     <form onSubmit={(e) => e.preventDefault()}>
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-tr from-[#ff7777] via-[#ff4545] to-blue-800">
-        <div className="bg-white w-[500px] h-[500px] rounded-lg shadow-[10px_10px_20px_rgba(0,0,0,0.3)] overflow-auto">
+        <div className="bg-white w-[600px] h-[600px] rounded-lg shadow-[10px_10px_20px_rgba(0,0,0,0.3)] overflow-auto">
           <div className="sticky top-0 bg-white z-50">
-            <div className="flex justify-between items-center px-6 pt-10">
+            <div className="flex justify-between items-center px-6 pt-10 pb-2">
               <div className="flex items-center gap-2">
                 <ClipboardCheckIcon color="darkblue" size={30} />
                 <h1 className="text-3xl font-bold text-blue-900">To-Do List</h1>
@@ -137,12 +159,12 @@ export const ToDoList = () => {
                 </label>
               </div>
             </div>
-            <div className="flex items-center relative mt-5 pb-7 mx-6">
+            <div className="flex items-center relative mt-5 pb-3.5 mx-6">
               <input
                 type="text"
                 className="pl-6 py-3 bg-gray-200 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-blue-950"
                 placeholder="Add your task"
-                value={newTask}
+                value={inputTask}
                 onChange={handleInputChange}
               />
               <button
@@ -152,76 +174,38 @@ export const ToDoList = () => {
                 ADD
               </button>
             </div>
+            <div className="flex justify-between text-center mx-10 pb-3.5">
+              <div className="text-sm font-semibold">
+                <span className="font-normal">Todos Added:</span> {tasks.length}
+              </div>
+              <button
+                className=" text-red-500 font-semibold text-sm text-center rounded-full cursor-pointer hover:underline"
+                onClick={() => deleteAll()}
+              >
+                Delete All
+              </button>
+            </div>
           </div>
 
           <div className="px-6 pb-4">
             <ol>
               {tasks.map((task, index) => (
-                <motion.li
-                  key={task + index}
-                  layout
-                  animate={{
-                    y:
-                      movingIndex === index
-                        ? direction === "up"
-                          ? -20
-                          : direction === "down"
-                          ? 20
-                          : 0
-                        : 0,
+                <TodoItem
+                  task={task}
+                  options={{
+                    direction,
+                    index,
+                    movingIndex,
+                    editingIndex,
+                    editValue,
+                    handleEditChange,
+                    saveEdit,
+                    moveTaskUp,
+                    moveTaskDown,
+                    startEdit,
+                    deleteTask,
                   }}
-                  transition={{ duration: 0.2 }}
-                  className="mb-2"
-                >
-                  <div className="flex items-center justify-between flex-wrap bg-gray-200 rounded-full w-full py-2 px-6">
-                    {editingIndex === index ? (
-                      <input
-                        type="text"
-                        value={editValue}
-                        onChange={handleEditChange}
-                        onBlur={() => saveEdit(index)}
-                        onKeyDown={(e) => e.key === "Enter" && saveEdit(index)}
-                        autoFocus
-                        className="flex-grow bg-white text-gray-800 px-3 py-1 rounded-full focus:outline-none mr-4"
-                      />
-                    ) : (
-                      <span className="text-gray-600 break-words max-w-full">
-                        {task}
-                      </span>
-                    )}
-                    <div className="flex gap-3">
-                      <button onClick={() => moveTaskUp(index)}>
-                        <ArrowUp
-                          className="text-gray-500 cursor-pointer"
-                          size={21}
-                        />
-                      </button>
-                      <button onClick={() => moveTaskDown(index)}>
-                        <ArrowDown
-                          className="text-gray-500 cursor-pointer"
-                          size={21}
-                        />
-                      </button>
-                      <Tooltip text="Edit">
-                        <button onClick={() => startEdit(index)}>
-                          <Pencil
-                            className="text-gray-500 cursor-pointer"
-                            size={21}
-                          />
-                        </button>
-                      </Tooltip>
-                      <Tooltip text="Delete">
-                        <button onClick={() => deleteTask(index)}>
-                          <Trash2
-                            className="text-gray-500 cursor-pointer"
-                            size={21}
-                          />
-                        </button>
-                      </Tooltip>
-                    </div>
-                  </div>
-                  <div ref={bottomRef} />
-                </motion.li>
+                />
               ))}
             </ol>
           </div>
