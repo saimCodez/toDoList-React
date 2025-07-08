@@ -1,7 +1,4 @@
-import {
-  ArrowDownAZ,
-  ClipboardCheckIcon,
-} from "lucide-react";
+import { ArrowDownAZ, ClipboardCheckIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { TodoItem } from "./toDoItem";
@@ -117,9 +114,9 @@ export const ToDoList = () => {
 
   const saveEdit = (index: number) => {
     const updated = [...tasks];
-    if(editValue?.text == ""){
-      alert("Please enter the value")
-      return 
+    if (editValue?.text == "") {
+      alert("Please enter the value");
+      return;
     }
     updated[index] = editValue || updated[index];
     setTasks(updated);
